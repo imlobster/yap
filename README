@@ -1,0 +1,49 @@
+
+yap:
+	a small and flexible test library for c++11.
+
+    imlobster (c) 2026
+    The Unlicense
+
+installation:
+    put yap.h in your include.
+
+usage:
+
+	// this how i like to use it.
+	// you can also split your test into multiple files:
+		// void test_ABC(yap::Yap &test);
+
+	yap::Yap test; // the test base
+
+	test("Addition", [] YAP_begin // always wrap test code with YAP_begin and YAP_done.
+		int a = 2 + 2;
+
+		YAP_REQUIRE(a == 4); // stops this test on incident.
+		YAP_CHECK(a == 5); // only notifies about incident.
+		YAP_CHECK_MSG("oh no!", a == 5); // '*_MSG' versions of the macros above allow you to specify incident message.
+	YAP_done);
+
+	auto run = test.run(); // returns vector<TestResult>.
+
+	// interpret output however you want!
+	for(auto &t : run)
+		for(auto &i : t.incidents)
+			std::cout << t.name << ": " << i << '\n';
+
+notes:
+
+	compilation of tests separately from main target can be implemented in Make.
+	'YAP_CHECK' and 'YAP_REQUIRE' take expressions with commas.
+	'*_MSG' macros only takes string literals as messages.
+	exceptions in tests are uncaught.
+
+api:
+
+	'struct TestResult': consists of 'std::string name' and 'std::vector<std::string> incidents'.
+
+	'yap::Yap(name, fn)': register test (do it with rvalues pls). throws on duplicated name.
+	'yap::clear()': clear tests (to reuse the test base).
+	'yap::run()': runs all tests (no incidents == good).
+	'yap::one(name)': runs a test. throws if not found.
+
